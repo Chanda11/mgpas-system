@@ -1,0 +1,347 @@
+<!-- templates/grading/grade_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Grade List - MGPAS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-graduation-cap me-2 text-primary"></i>Grade Management
+        <span class="badge bg-primary ms-2" id="gradeCount">{{ grades.count }}</span>
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'grading:grade_add' %}" class="btn btn-primary me-2">
+            <i class="fas fa-plus me-2"></i>Add Grade
+        </a>
+        <button class="btn btn-outline-secondary" onclick="refreshData()">
+            <i class="fas fa-sync-alt me-2"></i>Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Real-time Notifications -->
+<div id="realTimeNotification" class="alert alert-info alert-dismissible fade show mb-4" style="display: none;">
+    <i class="fas fa-info-circle me-2"></i>
+    <span id="notificationMessage"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search...">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="termFilter">
+                    <option value="">All Terms</option>
+                    <option value="TERM1">Term 1</option>
+                    <option value="TERM2">Term 2</option>
+                    <option value="TERM3">Term 3</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="typeFilter">
+                    <option value="">All Types</option>
+                    <option value="EXAM">Exam</option>
+                    <option value="TEST">Test</option>
+                    <option value="QUIZ">Quiz</option>
+                    <option value="ASSIGNMENT">Assignment</option>
+                    <option value="PROJECT">Project</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="subjectFilter">
+                    <option value="">All Subjects</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" onclick="filterGrades()">
+                    <i class="fas fa-filter me-2"></i>Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grades Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white text-center">
+            <div class="card-body">
+                <h5 class="card-title">Average Grade</h5>
+                <h3 id="averageGrade">{% if average_grade %}{{ average_grade|floatformat:1 }}%{% else %}N/A{% endif %}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Grades</h5>
+                <h3>{{ total_grades }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center">
+            <div class="card-body">
+                <h5 class="card-title">Students Graded</h5>
+                <h3>{{ students_graded }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white text-center">
+            <div class="card-body">
+                <h5 class="card-title">Subjects</h5>
+                <h3>{{ total_subjects }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grades Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Grade Records</h5>
+        <span class="badge bg-primary" id="filteredCount">{{ grades.count }} grades</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Assessment</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                        <th>Grade</th>
+                        <th>Term</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesTableBody">
+                    {% for grade in grades %}
+                    <tr>
+                        <td>{{ grade.student.first_name }} {{ grade.student.last_name }}</td>
+                        <td>{{ grade.subject.name }}</td>
+                        <td>{{ grade.assessment_name }}</td>
+                        <td>{{ grade.get_assessment_type_display }}</td>
+                        <td>{{ grade.score }}/{{ grade.max_score }}</td>
+                        <td>
+                            <span class="badge bg-{% if grade.percentage >= 80 %}success{% elif grade.percentage >= 60 %}warning{% else %}danger{% endif %}">
+                                {{ grade.percentage|floatformat:1 }}% ({{ grade.get_grade_letter }})
+                            </span>
+                        </td>
+                        <td>{{ grade.get_term_display }}</td>
+                        <td>{{ grade.date }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'grading:grade_edit' grade.id %}" class="btn btn-sm btn-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'grading:grade_delete' grade.id %}" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No grades found</h5>
+                            <p class="text-muted">Add grades to get started.</p>
+                            <a href="{% url 'grading:grade_add' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add First Grade
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Grade pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Grade management JavaScript
+let gradesData = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadGradesData();
+    startAutoRefresh();
+});
+
+async function loadGradesData() {
+    try {
+        const response = await fetch('/grading/api/grades/');
+        gradesData = await response.json();
+        updateGradeCount(gradesData.length);
+        calculateAverageGrade(gradesData);
+    } catch (error) {
+        console.error('Error loading grades data:', error);
+    }
+}
+
+function filterGrades() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const termFilter = document.getElementById('termFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    const subjectFilter = document.getElementById('subjectFilter').value;
+    
+    const filteredGrades = gradesData.filter(grade => {
+        const matchesSearch = grade.student_name.toLowerCase().includes(searchTerm) ||
+                             grade.subject_name.toLowerCase().includes(searchTerm) ||
+                             grade.assessment_name.toLowerCase().includes(searchTerm);
+        
+        const matchesTerm = !termFilter || grade.term === termFilter;
+        const matchesType = !typeFilter || grade.assessment_type === typeFilter;
+        const matchesSubject = !subjectFilter || grade.subject == subjectFilter;
+        
+        return matchesSearch && matchesTerm && matchesType && matchesSubject;
+    });
+    
+    renderGradesTable(filteredGrades);
+    updateGradeCount(filteredGrades.length);
+    calculateAverageGrade(filteredGrades);
+}
+
+function renderGradesTable(grades) {
+    const tbody = document.getElementById('gradesTableBody');
+    
+    if (grades.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center py-4">
+                    <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No grades found</h5>
+                    <p class="text-muted">Try adjusting your search criteria.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = grades.map(grade => `
+        <tr>
+            <td>${grade.student_name}</td>
+            <td>${grade.subject_name}</td>
+            <td>${grade.assessment_name}</td>
+            <td>${grade.assessment_type_display}</td>
+            <td>${grade.score}/${grade.max_score}</td>
+            <td>
+                <span class="badge bg-${getGradeBadgeColor(grade.percentage)}">
+                    ${grade.percentage.toFixed(1)}% (${getGradeLetter(grade.percentage)})
+                </span>
+            </td>
+            <td>${grade.term_display}</td>
+            <td>${new Date(grade.date).toLocaleDateString()}</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <a href="/grading/grades/${grade.id}/edit/" class="btn btn-sm btn-primary" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="/grading/grades/${grade.id}/delete/" class="btn btn-sm btn-danger" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function calculateAverageGrade(grades) {
+    if (grades.length === 0) {
+        document.getElementById('averageGrade').textContent = 'N/A';
+        return;
+    }
+    
+    const total = grades.reduce((sum, grade) => sum + grade.percentage, 0);
+    const average = total / grades.length;
+    document.getElementById('averageGrade').textContent = `${average.toFixed(1)}%`;
+}
+
+function updateGradeCount(count) {
+    document.getElementById('gradeCount').textContent = count;
+    document.getElementById('filteredCount').textContent = `${count} grades`;
+}
+
+function refreshData() {
+    loadGradesData();
+    showNotification('Grades data refreshed successfully!');
+}
+
+function startAutoRefresh() {
+    setInterval(refreshData, 30000); // Refresh every 30 seconds
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('realTimeNotification');
+    const messageElement = document.getElementById('notificationMessage');
+    
+    messageElement.textContent = message;
+    notification.style.display = 'block';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 5000);
+}
+
+function getGradeLetter(percentage) {
+    if (percentage >= 90) return 'A';
+    if (percentage >= 80) return 'B';
+    if (percentage >= 70) return 'C';
+    if (percentage >= 60) return 'D';
+    return 'F';
+}
+
+function getGradeBadgeColor(percentage) {
+    if (percentage >= 90) return 'success';
+    if (percentage >= 80) return 'primary';
+    if (percentage >= 70) return 'info';
+    if (percentage >= 60) return 'warning';
+    return 'danger';
+}
+
+// Real-time filtering
+document.getElementById('searchInput').addEventListener('input', filterGrades);
+document.getElementById('termFilter').addEventListener('change', filterGrades);
+document.getElementById('typeFilter').addEventListener('change', filterGrades);
+document.getElementById('subjectFilter').addEventListener('change', filterGrades);
+</script>
+{% endblock %}

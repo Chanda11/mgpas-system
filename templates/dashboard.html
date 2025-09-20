@@ -1,0 +1,240 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - MGPAS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard Overview
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-print me-1"></i>Print
+            </button>
+        </div>
+        <span class="badge bg-success me-2">
+            <i class="fas fa-circle me-1"></i>Online
+        </span>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Students
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_students }}</div>
+                        <div class="mt-2 text-success">
+                            <small><i class="fas fa-arrow-up me-1"></i>3.48% Since last month</small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Active Students
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_students }}</div>
+                        <div class="mt-2 text-success">
+                            <small><i class="fas fa-arrow-up me-1"></i>12.5% Since last month</small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Subjects
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_subjects }}</div>
+                        <div class="mt-2 text-info">
+                            <small><i class="fas fa-book-open me-1"></i>All subjects</small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Total Grades
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_grades }}</div>
+                        <div class="mt-2 text-warning">
+                            <small><i class="fas fa-graduation-cap me-1"></i>This term</small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+                <span class="badge bg-primary">Most Used</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'grading:student_add' %}" class="btn btn-primary w-100 d-flex align-items-center">
+                            <i class="fas fa-user-plus me-2"></i>Add Student
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'grading:grade_add' %}" class="btn btn-success w-100 d-flex align-items-center">
+                            <i class="fas fa-graduation-cap me-2"></i>Enter Grades
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'grading:student_list' %}" class="btn btn-info w-100 d-flex align-items-center">
+                            <i class="fas fa-list me-2"></i>View Students
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'authentication:profile' %}" class="btn btn-warning w-100 d-flex align-items-center">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-secondary w-100 d-flex align-items-center">
+                            <i class="fas fa-chart-bar me-2"></i>Reports
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="#" class="btn btn-dark w-100 d-flex align-items-center">
+                            <i class="fas fa-calendar me-2"></i>Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-history me-2"></i>Recent Activity
+                </h6>
+                <a href="#" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-user-plus text-success bg-light-success p-2 rounded-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">New Student Registered</h6>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                            <p class="mb-0 text-muted">John Doe was added to Grade 7A</p>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-graduation-cap text-primary bg-light-primary p-2 rounded-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">Grades Updated</h6>
+                                <small class="text-muted">5 hours ago</small>
+                            </div>
+                            <p class="mb-0 text-muted">Mathematics grades entered for Term 1</p>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-chalkboard-teacher text-info bg-light-info p-2 rounded-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">Class Assignment</h6>
+                                <small class="text-muted">1 day ago</small>
+                            </div>
+                            <p class="mb-0 text-muted">Class assignment updated for Grade 7A</p>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-calendar-check text-warning bg-light-warning p-2 rounded-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">Exam Scheduled</h6>
+                                <small class="text-muted">2 days ago</small>
+                            </div>
+                            <p class="mb-0 text-muted">End of term exams scheduled for next month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Message -->
+<div class="alert alert-primary">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-info-circle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading mb-1">Welcome to MGPAS, {{ user.get_full_name|default:user.username }}!</h5>
+            <p class="mb-0">You have successfully logged into the Musenga Grade & Performance Analysis System. 
+            Use the quick actions above to get started.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

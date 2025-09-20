@@ -1,0 +1,111 @@
+<!-- templates/partials/sidebar.html -->
+<div class="sidebar bg-white border-end" id="sidebar" style="width: 280px;">
+    <!-- User Profile -->
+    <div class="user-profile p-4 text-center border-bottom">
+        <div class="avatar-container mb-3">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Profile" 
+                     class="avatar-img rounded-circle shadow-sm">
+            {% else %}
+                <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto">
+                    {{ user.get_full_name|default:user.username|first|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <h6 class="mb-1 fw-semibold text-dark">{{ user.get_full_name|default:user.username }}</h6>
+        <span class="badge bg-light text-dark border">
+            {{ user.get_role_display }}
+        </span>
+    </div>
+
+    <!-- Navigation -->
+    <div class="sidebar-nav p-3">
+        <!-- Main Navigation -->
+        <div class="nav-section mb-4">
+            <h6 class="text-uppercase text-muted small fw-semibold mb-3 ps-2">Main</h6>
+            <div class="nav-list">
+                <a href="{% url 'dashboard' %}" class="nav-item {% if request.path == '/' %}active{% endif %}">
+                    <i class="nav-icon fas fa-home"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="{% url 'grading:student_list' %}" class="nav-item {% if 'students' in request.path %}active{% endif %}">
+                    <i class="nav-icon fas fa-users"></i>
+                    <span class="nav-text">Students</span>
+                    <span class="nav-badge bg-primary">{{ total_students|default:0 }}</span>
+                </a>
+                <a href="{% url 'grading:grade_list' %}" class="nav-item {% if 'grades' in request.path %}active{% endif %}">
+                    <i class="nav-icon fas fa-graduation-cap"></i>
+                    <span class="nav-text">Grades</span>
+                    <span class="nav-badge bg-success">{{ total_grades|default:0 }}</span>
+                </a>
+                <a href="{% url 'analytics:dashboard' %}" class="nav-item {% if 'analytics' in request.path %}active{% endif %}">
+                    <i class="nav-icon fas fa-chart-line"></i>
+                    <span class="nav-text">Analytics</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Management -->
+        <div class="nav-section mb-4">
+            <h6 class="text-uppercase text-muted small fw-semibold mb-3 ps-2">Management</h6>
+            <div class="nav-list">
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-book"></i>
+                    <span class="nav-text">Subjects</span>
+                    <span class="nav-badge bg-info">{{ total_subjects|default:0 }}</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-calendar"></i>
+                    <span class="nav-text">Calendar</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-file-alt"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-clipboard-list"></i>
+                    <span class="nav-text">Attendance</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Account -->
+        <div class="nav-section">
+            <h6 class="text-uppercase text-muted small fw-semibold mb-3 ps-2">Account</h6>
+            <div class="nav-list">
+                <a href="{% url 'authentication:profile' %}" class="nav-item {% if 'profile' in request.path %}active{% endif %}">
+                    <i class="nav-icon fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="nav-icon fas fa-cog"></i>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <form method="post" action="{% url 'authentication:logout' %}" class="nav-item logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <span class="nav-text">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="sidebar-footer p-3 border-top bg-light">
+        <div class="system-status">
+            <div class="status-item d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small">System Status</span>
+                <span class="status-dot bg-success"></span>
+            </div>
+            <div class="status-item d-flex align-items-center justify-content-between">
+                <span class="text-muted small">Last sync</span>
+                <span class="text-muted smaller">2 min ago</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
