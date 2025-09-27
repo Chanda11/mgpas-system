@@ -3,22 +3,16 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
-
-# Import your custom views
-from authentication.views import DashboardView, ProfileView  # Add ProfileView
+from authentication.views import DashboardView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(url='/auth/login/', permanent=False)),
+    path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('profile/', ProfileView.as_view(), name='profile'),  # Add this line
     path('auth/', include('authentication.urls')),
     path('grading/', include('grading.urls')),
     path('analytics/', include('analytics.urls')),
     path('reporting/', include('reporting.urls')),
-    
-    # PWA URLs
-    path('', include('pwa.urls')),
 ]
 
 if settings.DEBUG:

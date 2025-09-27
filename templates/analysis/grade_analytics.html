@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Grade Analytics - MGPAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Grade Analytics</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Grade Distribution Analysis</h6>
+                </div>
+                <div class="card-body">
+                    <p>Detailed grade analytics will be displayed here.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        This section will show grade distributions, trends, and comparative analysis.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Features Coming Soon:</h5>
+                            <ul>
+                                <li>Grade distribution charts</li>
+                                <li>Subject-wise performance</li>
+                                <li>Term comparison</li>
+                                <li>Pass/fail analysis</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Quick Actions:</h5>
+                            <a href="{% url 'grading:grade_list' %}" class="btn btn-primary btn-sm mb-2">
+                                <i class="fas fa-list"></i> View All Grades
+                            </a>
+                            <br>
+                            <a href="{% url 'grading:grade_add' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Add New Grade
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

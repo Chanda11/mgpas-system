@@ -1,241 +1,66 @@
-<!-- templates/analytics/dashboard.html -->
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Analytics Dashboard - MGPAS{% endblock %}
+{% block title %}Analytics - MGPAS{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">
-        <i class="fas fa-chart-bar me-2 text-primary"></i>Analytics Dashboard
-    </h1>
-</div>
-
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Students</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_students }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+        </h1>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Students</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_students }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Analytics Overview</h6>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Grades</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_grades }}</div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Analytics Features Coming Soon!</h5>
+                        <p class="mb-0">Advanced analytics and visualization features are currently under development. 
+                        Basic statistics are available on the main dashboard.</p>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Average Grade</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {% if overall_average %}{{ overall_average|floatformat:1 }}%{% else %}N/A{% endif %}
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_students }}</h3>
+                                    <p class="mb-0">Total Students</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_subjects }}</h3>
+                                    <p class="mb-0">Subjects</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h3>{{ total_grades }}</h3>
+                                    <p class="mb-0">Grades Recorded</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h3>{{ overall_average }}%</h3>
+                                    <p class="mb-0">Average Grade</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row">
-    <!-- Grade Distribution -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Grade Distribution</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="gradeDistributionChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Subject Averages -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Subject Averages</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="subjectAveragesChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Activity -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 class="card-title mb-0">Recent Grade Entries</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Subject</th>
-                        <th>Assessment</th>
-                        <th>Grade</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for grade in recent_grades %}
-                    <tr>
-                        <td>{{ grade.student.first_name }} {{ grade.student.last_name }}</td>
-                        <td>{{ grade.subject.name }}</td>
-                        <td>{{ grade.assessment_name }}</td>
-                        <td>
-                            <span class="badge bg-{% if grade.percentage >= 80 %}success{% elif grade.percentage >= 60 %}warning{% else %}danger{% endif %}">
-                                {{ grade.percentage|floatformat:1 }}%
-                            </span>
-                        </td>
-                        <td>{{ grade.created_at|date:"M d, Y" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Term Averages -->
-<div class="card">
-    <div class="card-header">
-        <h5 class="card-title mb-0">Term-wise Averages</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Term</th>
-                        <th>Average Grade</th>
-                        <th>Number of Grades</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for term in term_averages %}
-                    <tr>
-                        <td>{{ term.term }}</td>
-                        <td>{{ term.average|floatformat:1 }}%</td>
-                        <td>{{ term.count }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Grade Distribution Chart
-    const gradeDistributionCtx = document.getElementById('gradeDistributionChart').getContext('2d');
-    const gradeDistributionChart = new Chart(gradeDistributionCtx, {
-        type: 'pie',
-        data: {
-            labels: ['A (90-100%)', 'B (80-89%)', 'C (70-79%)', 'D (60-69%)', 'F (Below 60%)'],
-            datasets: [{
-                data: [
-                    {{ grade_distribution.A }},
-                    {{ grade_distribution.B }},
-                    {{ grade_distribution.C }},
-                    {{ grade_distribution.D }},
-                    {{ grade_distribution.F }}
-                ],
-                backgroundColor: [
-                    '#28a745', // Green for A
-                    '#007bff', // Blue for B
-                    '#17a2b8', // Teal for C
-                    '#ffc107', // Yellow for D
-                    '#dc3545'  // Red for F
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Subject Averages Chart
-    const subjectAveragesCtx = document.getElementById('subjectAveragesChart').getContext('2d');
-    const subjectAveragesChart = new Chart(subjectAveragesCtx, {
-        type: 'bar',
-        data: {
-            labels: [{% for subject in subject_averages %}'{{ subject.subject__name }}',{% endfor %}],
-            datasets: [{
-                label: 'Average Grade (%)',
-                data: [{% for subject in subject_averages %}{{ subject.average|floatformat:1 }},{% endfor %}],
-                backgroundColor: '#0d6efd'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            }
-        }
-    });
-});
-</script>
 {% endblock %}

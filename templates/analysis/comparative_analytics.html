@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comparative Analytics - MGPAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Comparative Analytics</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance Comparison</h6>
+                </div>
+                <div class="card-body">
+                    <p>Comparative analysis across classes, subjects, and time periods.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Compare performance across different dimensions to identify patterns and insights.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Comparison Types:</h5>
+                            <ul>
+                                <li>Class vs Class performance</li>
+                                <li>Subject comparison</li>
+                                <li>Term-over-term analysis</li>
+                                <li>Year-over-year trends</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Quick Insights:</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <small>Comparative analytics helps identify best practices and areas for improvement across the school.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

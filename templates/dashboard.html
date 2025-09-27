@@ -1,25 +1,38 @@
-<!-- templates/dashboard.html -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Dashboard - MGPAS{% endblock %}
 
+{% block extra_css %}
+<style>
+    .student-profile-card {
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+    .student-profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .performance-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .grade-progress {
+        height: 8px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">
-        <i class="fas fa-tachometer-alt me-2 text-primary"></i>MGPAS Dashboard
-    </h1>
+    <h1 class="h2"><i class="fas fa-tachometer-alt me-2 text-primary"></i>MGPAS Dashboard</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-download me-1"></i>Export
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-print me-1"></i>Print
-            </button>
-        </div>
         <span class="badge bg-success me-2">
             <i class="fas fa-circle me-1"></i>Online
+        </span>
+        <span class="badge bg-info">
+            <i class="fas fa-users me-1"></i>{{ total_students }} Students
         </span>
     </div>
 </div>
@@ -31,80 +44,66 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Students
-                        </div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Students</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_students }}</div>
                         <div class="mt-2 text-success">
-                            <small><i class="fas fa-arrow-up me-1"></i>3.48% Since last month</small>
+                            <small><i class="fas fa-user-check me-1"></i>{{ active_students }} Active</small>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                    </div>
+                    <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Active Students
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_students }}</div>
-                        <div class="mt-2 text-success">
-                            <small><i class="fas fa-arrow-up me-1"></i>12.5% Since last month</small>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Subjects</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_subjects }}</div>
+                        <div class="mt-2 text-info">
+                            <small><i class="fas fa-book-open me-1"></i>All subjects active</small>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                    </div>
+                    <div class="col-auto"><i class="fas fa-book fa-2x text-gray-300"></i></div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Subjects
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_subjects }}</div>
-                        <div class="mt-2 text-info">
-                            <small><i class="fas fa-book-open me-1"></i>All subjects</small>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Grades</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_grades }}</div>
+                        <div class="mt-2 text-warning">
+                            <small><i class="fas fa-graduation-cap me-1"></i>This academic year</small>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-book fa-2x text-gray-300"></i>
-                    </div>
+                    <div class="col-auto"><i class="fas fa-graduation-cap fa-2x text-gray-300"></i></div>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total Grades
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Top Student Avg</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {% if top_students %}{{ top_students.0.avg_grade|floatformat:1 }}%{% else %}N/A{% endif %}
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_grades }}</div>
-                        <div class="mt-2 text-warning">
-                            <small><i class="fas fa-graduation-cap me-1"></i>This term</small>
+                        <div class="mt-2 text-primary">
+                            <small><i class="fas fa-star me-1"></i>Best performer</small>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
-                    </div>
+                    <div class="col-auto"><i class="fas fa-trophy fa-2x text-gray-300"></i></div>
                 </div>
             </div>
         </div>
@@ -112,114 +111,165 @@
 </div>
 
 <div class="row">
-    <!-- Quick Actions -->
-    <div class="col-lg-6 mb-4">
+    <!-- Top Performing Students -->
+    <div class="col-lg-8 mb-4">
         <div class="card shadow">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                    <i class="fas fa-trophy me-2"></i>Top Performing Students
                 </h6>
-                <span class="badge bg-primary">Most Used</span>
+                <a href="{% url 'grading:student_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'grading:student_add' %}" class="btn btn-primary w-100 d-flex align-items-center">
-                            <i class="fas fa-user-plus me-2"></i>Add Student
-                        </a>
+                    {% for student in top_students %}
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card student-profile-card h-100" onclick="window.location.href='{% url 'grading:student_detail' student.pk %}'">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                         style="width: 60px; height: 60px; font-size: 24px;">
+                                        {{ student.first_name|first }}{{ student.last_name|first }}
+                                    </div>
+                                </div>
+                                <h6 class="card-title mb-1">{{ student.first_name }} {{ student.last_name }}</h6>
+                                <p class="text-muted small mb-2">{{ student.student_id }}</p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge performance-badge bg-{% if student.avg_grade >= 80 %}success{% elif student.avg_grade >= 60 %}warning{% else %}danger{% endif %}">
+                                        {{ student.avg_grade|floatformat:1 }}% Avg
+                                    </span>
+                                    <span class="badge performance-badge bg-info">
+                                        {{ student.grade_count }} grades
+                                    </span>
+                                </div>
+                                
+                                <div class="progress grade-progress">
+                                    <div class="progress-bar bg-{% if student.avg_grade >= 80 %}success{% elif student.avg_grade >= 60 %}warning{% else %}danger{% endif %}" 
+                                         style="width: {{ student.avg_grade }}%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'grading:grade_add' %}" class="btn btn-success w-100 d-flex align-items-center">
-                            <i class="fas fa-graduation-cap me-2"></i>Enter Grades
-                        </a>
+                    {% empty %}
+                    <div class="col-12 text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No student data available yet.</p>
+                        <a href="{% url 'grading:student_add' %}" class="btn btn-primary">Add Students</a>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'grading:student_list' %}" class="btn btn-info w-100 d-flex align-items-center">
-                            <i class="fas fa-list me-2"></i>View Students
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'authentication:profile' %}" class="btn btn-warning w-100 d-flex align-items-center">
-                            <i class="fas fa-cog me-2"></i>Settings
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="#" class="btn btn-secondary w-100 d-flex align-items-center">
-                            <i class="fas fa-chart-bar me-2"></i>Reports
-                        </a>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="#" class="btn btn-dark w-100 d-flex align-items-center">
-                            <i class="fas fa-calendar me-2"></i>Calendar
-                        </a>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Recent Activity -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <!-- Recent Activity -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-history me-2"></i>Recent Activity
+                    <i class="fas fa-history me-2"></i>Recent Grade Entries
                 </h6>
-                <a href="#" class="btn btn-sm btn-link">View All</a>
             </div>
             <div class="card-body">
+                {% if recent_grades %}
                 <div class="list-group list-group-flush">
-                    <div class="list-group-item d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fas fa-user-plus text-success bg-light-success p-2 rounded-circle"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-1">New Student Registered</h6>
-                                <small class="text-muted">2 hours ago</small>
-                            </div>
-                            <p class="mb-0 text-muted">John Doe was added to Grade 7A</p>
-                        </div>
-                    </div>
-                    
+                    {% for grade in recent_grades %}
                     <div class="list-group-item d-flex align-items-center">
                         <div class="me-3">
                             <i class="fas fa-graduation-cap text-primary bg-light-primary p-2 rounded-circle"></i>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between">
-                                <h6 class="mb-1">Grades Updated</h6>
-                                <small class="text-muted">5 hours ago</small>
+                                <h6 class="mb-1">{{ grade.student.get_full_name }}</h6>
+                                <small class="text-muted">{{ grade.date|date:"M d, Y" }}</small>
                             </div>
-                            <p class="mb-0 text-muted">Mathematics grades entered for Term 1</p>
+                            <p class="mb-0 text-muted">
+                                {{ grade.subject.name }} - {{ grade.assessment_name }}: 
+                                <strong>{{ grade.percentage|floatformat:1 }}% ({{ grade.get_grade_letter }})</strong>
+                            </p>
                         </div>
                     </div>
-                    
-                    <div class="list-group-item d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fas fa-chalkboard-teacher text-info bg-light-info p-2 rounded-circle"></i>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No recent grade entries.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Class Stats -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'grading:student_add' %}" class="btn btn-primary btn-block text-start">
+                        <i class="fas fa-user-plus me-2"></i>Add New Student
+                    </a>
+                    <a href="{% url 'grading:grade_add' %}" class="btn btn-success btn-block text-start">
+                        <i class="fas fa-graduation-cap me-2"></i>Enter Grades
+                    </a>
+                    <a href="{% url 'reporting:student_report' %}" class="btn btn-info btn-block text-start">
+                        <i class="fas fa-file-alt me-2"></i>Generate Reports
+                    </a>
+                    <a href="{% url 'analytics:dashboard' %}" class="btn btn-warning btn-block text-start">
+                        <i class="fas fa-chart-bar me-2"></i>View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Statistics -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Class Statistics
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if class_stats %}
+                <div class="list-group list-group-flush">
+                    {% for class in class_stats %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ class.name }}</h6>
+                            <small class="text-muted">{{ class.student_count }} students</small>
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-1">Class Assignment</h6>
-                                <small class="text-muted">1 day ago</small>
-                            </div>
-                            <p class="mb-0 text-muted">Class assignment updated for Grade 7A</p>
-                        </div>
+                        <span class="badge bg-{% if class.avg_grade >= 70 %}success{% else %}warning{% endif %} rounded-pill">
+                            {% if class.avg_grade %}{{ class.avg_grade|floatformat:1 }}%{% else %}N/A{% endif %}
+                        </span>
                     </div>
-                    
-                    <div class="list-group-item d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fas fa-calendar-check text-warning bg-light-warning p-2 rounded-circle"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-1">Exam Scheduled</h6>
-                                <small class="text-muted">2 days ago</small>
-                            </div>
-                            <p class="mb-0 text-muted">End of term exams scheduled for next month</p>
-                        </div>
-                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No class statistics available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle me-2"></i>System Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Database:</span>
+                    <span class="badge bg-success">Connected</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Users Online:</span>
+                    <span class="badge bg-info">1</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Last Backup:</span>
+                    <span class="badge bg-secondary">Today</span>
                 </div>
             </div>
         </div>
@@ -227,14 +277,35 @@
 </div>
 
 <!-- Welcome Message -->
-<div class="alert alert-primary">
+<div class="alert alert-primary mt-4">
     <div class="d-flex align-items-center">
         <i class="fas fa-info-circle fa-2x me-3"></i>
         <div>
             <h5 class="alert-heading mb-1">Welcome to MGPAS, {{ user.get_full_name|default:user.username }}!</h5>
             <p class="mb-0">You have successfully logged into the Musenga Grade & Performance Analysis System. 
-            Use the quick actions above to get started.</p>
+            Click on student profiles to view detailed performance reports.</p>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add click functionality to student profile cards
+document.addEventListener('DOMContentLoaded', function() {
+    const profileCards = document.querySelectorAll('.student-profile-card');
+    profileCards.forEach(card => {
+        card.style.cursor = 'pointer';
+    });
+});
+
+// Auto-dismiss alerts after 5 seconds
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 5000);
+</script>
 {% endblock %}

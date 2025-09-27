@@ -1,4 +1,3 @@
-<!-- templates/partials/navbar.html -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'dashboard' %}">
@@ -10,15 +9,13 @@
         </button>
 
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <!-- Left side navigation -->
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard' %}">
                         <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                     </a>
                 </li>
                 
-                <!-- Students Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle {% if 'students' in request.path %}active{% endif %}" 
                        href="#" role="button" data-bs-toggle="dropdown">
@@ -31,14 +28,9 @@
                         <li><a class="dropdown-item" href="{% url 'grading:student_add' %}">
                             <i class="fas fa-user-plus me-2"></i>Add New Student
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-chart-line me-2"></i>Student Reports
-                        </a></li>
                     </ul>
                 </li>
 
-                <!-- Grades Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle {% if 'grades' in request.path %}active{% endif %}" 
                        href="#" role="button" data-bs-toggle="dropdown">
@@ -51,32 +43,27 @@
                         <li><a class="dropdown-item" href="{% url 'grading:grade_add' %}">
                             <i class="fas fa-plus me-2"></i>Add Grade
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'analytics:dashboard' %}">
-                            <i class="fas fa-chart-bar me-2"></i>Grade Analytics
-                        </a></li>
                     </ul>
                 </li>
 
-                <!-- Reports Dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle {% if 'reporting' in request.path %}active{% endif %}" 
+                       href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-file-alt me-1"></i>Reports
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">
+                        <li><a class="dropdown-item" href="{% url 'reporting:dashboard' %}">
+                            <i class="fas fa-chart-pie me-2"></i>Reports Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'reporting:student_report' %}">
                             <i class="fas fa-user-graduate me-2"></i>Student Reports
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-chart-pie me-2"></i>Grade Reports
-                        </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-attendance me-2"></i>Attendance Reports
+                        <li><a class="dropdown-item" href="{% url 'reporting:class_report' %}">
+                            <i class="fas fa-users me-2"></i>Class Reports
                         </a></li>
                     </ul>
                 </li>
 
-                <!-- Analytics -->
                 <li class="nav-item">
                     <a class="nav-link {% if 'analytics' in request.path %}active{% endif %}" 
                        href="{% url 'analytics:dashboard' %}">
@@ -85,74 +72,15 @@
                 </li>
             </ul>
 
-            <!-- Right side navigation -->
             <ul class="navbar-nav ms-auto">
-                <!-- Quick Actions Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-bolt me-1"></i>Quick Actions
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'grading:student_add' %}">
-                            <i class="fas fa-user-plus me-2"></i>Add Student
-                        </a></li>
-                        <li><a class="dropdown-item" href="{% url 'grading:grade_add' %}">
-                            <i class="fas fa-graduation-cap me-2"></i>Add Grade
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-print me-2"></i>Print Reports
-                        </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-download me-2"></i>Export Data
-                        </a></li>
-                    </ul>
-                </li>
-
-                <!-- Notifications -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge bg-danger badge-notification">3</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-user-plus text-success me-2"></i>
-                            New student registered
-                        </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-graduation-cap text-primary me-2"></i>
-                            Grades updated
-                        </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-calendar text-warning me-2"></i>
-                            Meeting reminder
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-center" href="#">
-                            View All Notifications
-                        </a></li>
-                    </ul>
-                </li>
-
-                <!-- User Profile -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        {% if user.profile_picture %}
-                            <img src="{{ user.profile_picture.url }}" alt="Profile" 
-                                 class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">
-                        {% else %}
-                            <i class="fas fa-user-circle"></i>
-                        {% endif %}
+                        <i class="fas fa-user-circle"></i>
                         {{ user.get_full_name|default:user.username }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{% url 'authentication:profile' %}">
                             <i class="fas fa-user me-2"></i>Profile
-                        </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-cog me-2"></i>Settings
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
@@ -166,16 +94,6 @@
                     </ul>
                 </li>
             </ul>
-
-            <!-- Search Form -->
-            <form class="d-flex ms-3" role="search">
-                <div class="input-group">
-                    <input class="form-control form-control-sm" type="search" placeholder="Search..." aria-label="Search">
-                    <button class="btn btn-outline-light btn-sm" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </nav>

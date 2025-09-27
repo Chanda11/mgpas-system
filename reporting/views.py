@@ -1,95 +1,77 @@
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
-from grading.models import Student, Grade, Class
-from django.shortcuts import get_object_or_404
-import csv
-from django.utils import timezone
+from django.urls import reverse_lazy
+from django.contrib import messages
+from .models import GeneratedReport, ReportTemplate
+from .forms import StudentReportForm, ClassReportForm, SchoolReportForm
+from .services import ReportGenerator
 
-class ReportingDashboardView(LoginRequiredMixin, TemplateView):
+class ReportsDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'reporting/dashboard.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['classes'] = Class.objects.all()
+        context['total_reports'] = GeneratedReport.objects.filter(generated_by=self.request.user).count()
+        context['recent_reports'] = GeneratedReport.objects.filter(generated_by=self.request.user)[:5]
         return context
 
-class StudentReportView(LoginRequiredMixin, TemplateView):
+class StudentReportView(LoginRequiredMixin, FormView):
     template_name = 'reporting/student_report.html'
+    form_class = StudentReportForm
+    success_url = reverse_lazy('reporting:dashboard')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        student_id = self.kwargs['student_id']
-        student = get_object_or_404(Student, id=student_id)
-        
-        # Get all grades for this student
-        grades = Grade.objects.filter(student=student)
-        
-        # Calculate subject statistics
-        subject_stats = {}
-        for grade in grades:
-            if grade.subject.name not in subject_stats:
-                subject_stats[grade.subject.name] = {
-                    'total_score': 0,
-                    'count': 0,
-                    'avg_score': 0
-                }
-            subject_stats[grade.subject.name]['total_score'] += float(grade.percentage)
-            subject_stats[grade.subject.name]['count'] += 1
-        
-        # Calculate averages
-        for subject, stats in subject_stats.items():
-            stats['avg_score'] = stats['total_score'] / stats['count'] if stats['count'] > 0 else 0
-        
-        # Calculate overall average
-        overall_avg = sum(stats['avg_score'] for stats in subject_stats.values()) / len(subject_stats) if subject_stats else 0
-        
-        context['student'] = student
-        context['grades'] = grades
-        context['subject_stats'] = subject_stats
-        context['overall_avg'] = overall_avg
-        
-        return context
+    def form_valid(self, form):
+        try:
+            student = form.cleaned_data['student']
+            academic_year = form.cleaned_data['academic_year']
+            term = form.cleaned_data['term']
+            format = form.cleaned_data['format']
+            
+            response = ReportGenerator.generate_student_report_card(student, academic_year, term, format)
+            
+            # Save report record
+            template, created = ReportTemplate.objects.get_or_create(
+                report_type='STUDENT',
+                defaults={'name': 'Student Report Card'}
+            )
+            
+            GeneratedReport.objects.create(
+                report_template=template,
+                title=f"Report - {student.get_full_name()}",
+                generated_by=self.request.user,
+                parameters={'student_id': student.id},
+                format=format
+            )
+            
+            messages.success(self.request, 'Report generated successfully!')
+            return response
+            
+        except Exception as e:
+            messages.error(self.request, f'Error: {str(e)}')
+            return self.form_invalid(form)
 
-class CSVExportView(LoginRequiredMixin, View):
-    def get(self, request):
-        # Create CSV response
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="mgpas_export_{}.csv"'.format(
-            timezone.now().strftime("%Y%m%d_%H%M%S")
-        )
-        
-        writer = csv.writer(response)
-        writer.writerow(['Student', 'Subject', 'Assessment', 'Type', 'Score', 'Max Score', 'Percentage', 'Term', 'Date'])
-        
-        grades = Grade.objects.all().select_related('student', 'subject')
-        for grade in grades:
-            writer.writerow([
-                f"{grade.student.first_name} {grade.student.last_name}",
-                grade.subject.name,
-                grade.assessment_name,
-                grade.get_assessment_type_display(),
-                grade.score,
-                grade.max_score,
-                grade.percentage,
-                grade.get_term_display(),
-                grade.date
-            ])
-        
-        return response
-
-class ClassReportView(LoginRequiredMixin, TemplateView):
+class ClassReportView(LoginRequiredMixin, FormView):
     template_name = 'reporting/class_report.html'
+    form_class = ClassReportForm
+    success_url = reverse_lazy('reporting:dashboard')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        class_id = self.kwargs['class_id']
-        class_obj = get_object_or_404(Class, id=class_id)
-        
-        # Get students in this class
-        students = Student.objects.filter(current_class=class_obj)
-        
-        context['class'] = class_obj
-        context['students'] = students
-        
-        return context
+    def form_valid(self, form):
+        messages.info(self.request, 'Class report functionality coming soon!')
+        return super().form_valid(form)
+
+class SchoolReportView(LoginRequiredMixin, FormView):
+    template_name = 'reporting/school_report.html'
+    form_class = SchoolReportForm
+    success_url = reverse_lazy('reporting:dashboard')
+    
+    def form_valid(self, form):
+        messages.info(self.request, 'School report functionality coming soon!')
+        return super().form_valid(form)
+
+class ReportHistoryView(LoginRequiredMixin, ListView):
+    model = GeneratedReport
+    template_name = 'reporting/report_history.html'
+    context_object_name = 'reports'
+    
+    def get_queryset(self):
+        return GeneratedReport.objects.filter(generated_by=self.request.user)

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports Dashboard - MGPAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Reports Dashboard</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-graduate me-2"></i>Student Reports
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p>Generate individual student report cards.</p>
+                    <a href="{% url 'reporting:student_report' %}" class="btn btn-primary btn-block">
+                        Generate Student Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-users me-2"></i>Class Reports
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p>Create comprehensive class performance summaries.</p>
+                    <a href="{% url 'reporting:class_report' %}" class="btn btn-success btn-block">
+                        Generate Class Report
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-school me-2"></i>School Reports
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p>Generate overall school performance reports.</p>
+                    <a href="{% url 'reporting:school_report' %}" class="btn btn-info btn-block">
+                        Generate School Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

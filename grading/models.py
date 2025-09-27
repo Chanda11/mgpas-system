@@ -26,14 +26,6 @@ class Subject(models.Model):
     
     def __str__(self):
         return self.name
-    
-    def average_score(self, term=None):
-        grades = Grade.objects.filter(subject=self)
-        if term:
-            grades = grades.filter(term=term)
-        if grades.exists():
-            return grades.aggregate(avg=models.Avg('percentage'))['avg']
-        return 0
 
 class Student(models.Model):
     first_name = models.CharField(max_length=100)
@@ -46,10 +38,6 @@ class Student(models.Model):
     current_class = models.ForeignKey(Class, on_delete=models.SET_NULL, null=True, blank=True)
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
     enrollment_date = models.DateField()
-    graduation_year = models.IntegerField(blank=True, null=True)
-    emergency_contact_name = models.CharField(max_length=100, blank=True)
-    emergency_contact_phone = models.CharField(max_length=15, blank=True)
-    profile_picture = models.ImageField(upload_to='students/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -71,7 +59,6 @@ class Grade(models.Model):
         TEST = 'TEST', _('Test')
         QUIZ = 'QUIZ', _('Quiz')
         ASSIGNMENT = 'ASSIGNMENT', _('Assignment')
-        PROJECT = 'PROJECT', _('Project')
     
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
@@ -94,36 +81,12 @@ class Grade(models.Model):
     def __str__(self):
         return f"{self.student} - {self.subject} - {self.score}"
     
-    def get_gpa(self, term=None):
-        grades = Grade.objects.filter(student=self)
-        if term:
-            grades = grades.filter(term=term)
-        
-        if grades.exists():
-            total_percentage = sum(grade.percentage for grade in grades)
-            return total_percentage / grades.count()
-        return 0
-    
-    def get_grade_letter(self, percentage):
-        if percentage >= 90: return 'A'
-        elif percentage >= 80: return 'B'
-        elif percentage >= 70: return 'C'
-        elif percentage >= 60: return 'D'
-        else: return 'F'
-    
-    class Meta:
-        ordering = ['-date', 'student']
-    class Meta:
-        ordering = ['-date', 'student']
-        unique_together = ['student', 'subject', 'assessment_name', 'term']
-    
-    def save(self, *args, **kwargs):
-        self.percentage = (self.score / self.max_score) * 100
-        super().save(*args, **kwargs)
-    
     def get_grade_letter(self):
         if self.percentage >= 90: return 'A'
         elif self.percentage >= 80: return 'B'
         elif self.percentage >= 70: return 'C'
         elif self.percentage >= 60: return 'D'
         else: return 'F'
+    
+    class Meta:
+        ordering = ['-date', 'student']

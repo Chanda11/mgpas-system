@@ -1,58 +1,222 @@
-<!-- templates/grading/student_detail.html -->
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ student.first_name }} {{ student.last_name }} - MGPAS{% endblock %}
+{% block title %}{{ student.get_full_name }} - MGPAS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .performance-card {
+        transition: all 0.3s ease;
+    }
+    .performance-card:hover {
+        transform: translateY(-2px);
+    }
+    .grade-badge {
+        font-size: 0.75rem;
+    }
+    .subject-progress {
+        height: 10px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">
-        <i class="fas fa-user me-2 text-primary"></i>Student Details
-    </h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'grading:student_edit' student.id %}" class="btn btn-primary me-2">
-            <i class="fas fa-edit me-2"></i>Edit Student
-        </a>
-        <a href="{% url 'grading:student_list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to List
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Student Information</h5>
+<div class="container-fluid">
+    <!-- Student Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                 style="width: 60px; height: 60px; font-size: 24px;">
+                {{ student.first_name|first }}{{ student.last_name|first }}
             </div>
-            <div class="card-body">
-                <p><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</p>
-                <p><strong>Student ID:</strong> {{ student.student_id }}</p>
-                <p><strong>Email:</strong> {{ student.email|default:"Not provided" }}</p>
-                <p><strong>Phone:</strong> {{ student.phone|default:"Not provided" }}</p>
-                <p><strong>Date of Birth:</strong> {{ student.date_of_birth }}</p>
-                <p><strong>Class:</strong> {{ student.current_class|default:"Not assigned" }}</p>
-                <p><strong>Status:</strong> 
-                    <span class="badge bg-{% if student.is_active %}success{% else %}danger{% endif %}">
-                        {% if student.is_active %}Active{% else %}Inactive{% endif %}
-                    </span>
-                </p>
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">{{ student.first_name }} {{ student.last_name }}</h1>
+                <p class="text-muted mb-0">Student ID: {{ student.student_id }}</p>
             </div>
         </div>
+        <div class="mt-3 mt-sm-0">
+            <a href="{% url 'reporting:student_report' %}?student_id={{ student.id }}" class="btn btn-primary">
+                <i class="fas fa-file-pdf me-1"></i>Generate Report
+            </a>
+            <a href="{% url 'grading:student_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Students
+            </a>
+        </div>
     </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Academic Information</h5>
+
+    <div class="row">
+        <!-- Student Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow performance-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Student Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td><strong>Student ID:</strong></td>
+                            <td>{{ student.student_id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Class:</strong></td>
+                            <td>{{ student.current_class.name|default:"Not assigned" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ student.email|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phone:</strong></td>
+                            <td>{{ student.phone|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                <span class="badge bg-{% if student.is_active %}success{% else %}secondary{% endif %}">
+                                    {% if student.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-            <div class="card-body">
-                <p><strong>Enrollment Date:</strong> {{ student.enrollment_date }}</p>
-                <p><strong>Academic Year:</strong> {{ student.academic_year|default:"Not specified" }}</p>
-                {% if student.address %}
-                <p><strong>Address:</strong> {{ student.address }}</p>
-                {% endif %}
+
+            <!-- Overall Performance -->
+            {% if avg_grade %}
+            <div class="card shadow performance-card mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-chart-line me-2"></i>Overall Performance
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="display-4 text-success">{{ avg_grade|floatformat:1 }}%</h2>
+                    <p class="text-muted">Average Grade</p>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h5 class="text-primary">{{ total_grades }}</h5>
+                            <small>Total Grades</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-warning">{{ best_grade|floatformat:1 }}%</h5>
+                            <small>Best Grade</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-info">{{ subject_performance|length }}</h5>
+                            <small>Subjects</small>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endif %}
+        </div>
+
+        <!-- Academic Performance -->
+        <div class="col-lg-8 mb-4">
+            {% if grades %}
+            <!-- Grade Distribution -->
+            <div class="card shadow performance-card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-chart-pie me-2"></i>Grade Distribution
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-2">
+                            <span class="badge grade-badge bg-success p-2">A: {{ grade_distribution.A }}</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="badge grade-badge bg-info p-2">B: {{ grade_distribution.B }}</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="badge grade-badge bg-warning p-2">C: {{ grade_distribution.C }}</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="badge grade-badge bg-orange p-2">D: {{ grade_distribution.D }}</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="badge grade-badge bg-danger p-2">F: {{ grade_distribution.F }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Performance -->
+            <div class="card shadow performance-card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-book me-2"></i>Subject Performance
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for subject in subject_performance %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>{{ subject.subject__name }}</span>
+                            <span class="fw-bold">{{ subject.avg_score|floatformat:1 }}% ({{ subject.count }} grades)</span>
+                        </div>
+                        <div class="progress subject-progress">
+                            <div class="progress-bar bg-{% if subject.avg_score >= 80 %}success{% elif subject.avg_score >= 60 %}warning{% else %}danger{% endif %}" 
+                                 style="width: {{ subject.avg_score }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Grades -->
+            <div class="card shadow performance-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-list me-2"></i>Recent Grades
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Assessment</th>
+                                    <th>Score</th>
+                                    <th>Grade</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade in grades|slice:":10" %}
+                                <tr>
+                                    <td>{{ grade.subject.name }}</td>
+                                    <td>{{ grade.assessment_name }}</td>
+                                    <td>{{ grade.score }}/{{ grade.max_score }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if grade.percentage >= 80 %}success{% elif grade.percentage >= 60 %}warning{% else %}danger{% endif %}">
+                                            {{ grade.percentage|floatformat:1 }}% ({{ grade.get_grade_letter }})
+                                        </span>
+                                    </td>
+                                    <td>{{ grade.date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Grade Data Available</h5>
+                    <p class="text-muted">This student doesn't have any grades recorded yet.</p>
+                    <a href="{% url 'grading:grade_add' %}?student_id={{ student.id }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Add First Grade
+                    </a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

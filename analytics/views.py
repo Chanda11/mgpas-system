@@ -1,8 +1,7 @@
-# analytics/views.py
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Count, Q
-from grading.models import Grade, Student, Subject
+from grading.models import Student, Grade, Subject, Class
 
 class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'analytics/dashboard.html'
@@ -10,81 +9,63 @@ class AnalyticsDashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Overall statistics
-        context['total_students'] = Student.objects.count()
-        context['active_students'] = Student.objects.filter(is_active=True).count()
-        context['total_grades'] = Grade.objects.count()
-        context['total_subjects'] = Subject.objects.count()
-        
-        # Average grades
-        context['overall_average'] = Grade.objects.aggregate(avg=Avg('percentage'))['avg']
-        
-        # Grade distribution
-        context['grade_distribution'] = {
-            'A': Grade.objects.filter(percentage__gte=90).count(),
-            'B': Grade.objects.filter(percentage__gte=80, percentage__lt=90).count(),
-            'C': Grade.objects.filter(percentage__gte=70, percentage__lt=80).count(),
-            'D': Grade.objects.filter(percentage__gte=60, percentage__lt=70).count(),
-            'F': Grade.objects.filter(percentage__lt=60).count()
-        }
-        
-        # Subject averages
-        context['subject_averages'] = Grade.objects.values(
-            'subject__name'
-        ).annotate(
-            average=Avg('percentage'),
-            count=Count('id')
-        ).order_by('subject__name')
-        
-        # Term averages
-        context['term_averages'] = Grade.objects.values(
-            'term'
-        ).annotate(
-            average=Avg('percentage'),
-            count=Count('id')
-        ).order_by('term')
-        
-        # Recent activity
-        context['recent_grades'] = Grade.objects.select_related(
-            'student', 'subject'
-        ).order_by('-created_at')[:10]
+        try:
+            # Basic statistics
+            context['total_students'] = Student.objects.filter(is_active=True).count()
+            context['total_subjects'] = Subject.objects.count()
+            context['total_grades'] = Grade.objects.count()
+            
+            # Average grade
+            avg_grade = Grade.objects.aggregate(avg=Avg('percentage'))['avg']
+            context['overall_average'] = round(avg_grade, 2) if avg_grade else 0
+            
+            # Top performing students
+            top_students = Student.objects.annotate(
+                avg_grade=Avg('grade__percentage'),
+                grade_count=Count('grade')
+            ).filter(avg_grade__isnull=False, grade_count__gte=1).order_by('-avg_grade')[:5]
+            context['top_students'] = top_students
+            
+            # Subject performance
+            subject_performance = Subject.objects.annotate(
+                avg_score=Avg('grade__percentage'),
+                total_grades=Count('grade')
+            ).filter(avg_score__isnull=False).order_by('-avg_score')[:5]
+            context['subject_performance'] = subject_performance
+            
+            # Class performance
+            class_performance = Class.objects.annotate(
+                avg_grade=Avg('student__grade__percentage'),
+                student_count=Count('student', filter=Q(student__is_active=True))
+            ).filter(student_count__gt=0).order_by('-avg_grade')[:5]
+            context['class_performance'] = class_performance
+            
+        except Exception as e:
+            # Fallback data
+            context.update({
+                'total_students': 0,
+                'total_subjects': 0,
+                'total_grades': 0,
+                'overall_average': 0,
+                'top_students': [],
+                'subject_performance': [],
+                'class_performance': [],
+            })
         
         return context
 
-class SubjectAnalyticsView(LoginRequiredMixin, TemplateView):
-    template_name = 'analytics/subject_analytics.html'
+class GradeAnalyticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'analytics/grade_analytics.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        subject_id = self.kwargs.get('subject_id')
-        
-        subject = Subject.objects.get(id=subject_id)
-        context['subject'] = subject
-        
-        # Subject grades
-        grades = Grade.objects.filter(subject=subject)
-        context['grades'] = grades
-        
-        # Statistics
-        context['average_grade'] = grades.aggregate(avg=Avg('percentage'))['avg']
-        context['total_grades'] = grades.count()
-        context['students_graded'] = grades.values('student').distinct().count()
-        
-        # Grade distribution for this subject
-        context['grade_distribution'] = {
-            'A': grades.filter(percentage__gte=90).count(),
-            'B': grades.filter(percentage__gte=80, percentage__lt=90).count(),
-            'C': grades.filter(percentage__gte=70, percentage__lt=80).count(),
-            'D': grades.filter(percentage__gte=60, percentage__lt=70).count(),
-            'F': grades.filter(percentage__lt=60).count()
-        }
-        
-        # Term-wise averages
-        context['term_averages'] = grades.values(
-            'term'
-        ).annotate(
-            average=Avg('percentage'),
-            count=Count('id')
-        ).order_by('term')
-        
+        context['subjects'] = Subject.objects.all()
+        return context
+
+class StudentAnalyticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'analytics/student_analytics.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['students'] = Student.objects.filter(is_active=True)
         return context
